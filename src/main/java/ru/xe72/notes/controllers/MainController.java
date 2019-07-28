@@ -10,7 +10,9 @@ import ru.xe72.notes.entity.Note;
 import ru.xe72.notes.entity.Tag;
 import ru.xe72.notes.utils.NU;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,21 +27,12 @@ public class MainController {
     TagsRepository tagsRepository;
 
     @GetMapping("notes")
-    public List<Note> getNotes(@RequestParam("filter") String filter,
-                               @RequestParam("sortCol") String sortCol,
-                               @RequestParam("sortAsc") Boolean sortAsc) {
-//        Note test = new Note();
-//        test.setTitle("test title");
-//        test.setText("test text");
-//        Note test2 = new Note();
-//        test2.setText("test title 2");
-//        test2.setText("test text 2");
-//        test2.setTags(new HashSet<Tag>(){{add(new Tag("tag1"));add(new Tag("tag2"));}});
-//        return Arrays.asList(test, test2);
-
+    public List<Note> getNotes(@RequestParam(value = "filter", required = false) String filter,
+                               @RequestParam(value = "sortCol", required = false) String sortCol,
+                               @RequestParam(value = "sortAsc", required = false) Boolean sortAsc) {
         List<Note> result;
 
-        Sort sort = Sort.by(sortAsc ? Sort.Direction.ASC : Sort.Direction.DESC,
+        Sort sort = Sort.by(Boolean.TRUE.equals(sortAsc) ? Sort.Direction.ASC : Sort.Direction.DESC,
                 NU.nvlOrEmpty(sortCol, "createDate"));
         if (StringUtils.isEmpty(filter)) {
             result = notesRepository.findAll(sort);
@@ -55,7 +48,13 @@ public class MainController {
     }
 
     @PostMapping("notes")
-    public Note addNote(@RequestBody Note note) {
+    public Note addNote(@RequestBody @Valid Note note) {
+        // TODO: Можно ли сделать декларативно?
+        if (note.getCreateDate() == null) {
+            note.setCreateDate(new Date());
+        }
+        note.setModifyDate(new Date());
+
         ArrayList<Tag> newTags = new ArrayList<>();
         if (note.getTags() != null) {
             tagsRepository.saveAll(note.getTags().stream()

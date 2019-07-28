@@ -1,6 +1,9 @@
 package ru.xe72.notes.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.util.Collection;
 import java.util.Date;
 
@@ -11,7 +14,11 @@ public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @NotBlank(message = "Заголовок не может быть пустым")
     private String title;
+
+    @NotBlank(message = "Текст заметки не может быть пустым")
     private String text;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -19,7 +26,9 @@ public class Note {
 
     @ManyToOne
     private NoteUser user;
+
     private Date createDate;
+
     private Date modifyDate;
 
     public Long getId() {
