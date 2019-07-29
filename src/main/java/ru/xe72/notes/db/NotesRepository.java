@@ -12,4 +12,6 @@ public interface NotesRepository extends CrudRepository<Note, Long> {
     List<Note> findAll(Sort sort);
 
     List<Note> findAllByTitleIn(String title, Sort sort);
+
+    void deleteByIdIn(List<Long> ids);
 }
