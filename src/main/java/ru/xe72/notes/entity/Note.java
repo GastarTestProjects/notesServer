@@ -1,6 +1,12 @@
 package ru.xe72.notes.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
+import org.springframework.jdbc.support.incrementer.H2SequenceMaxValueIncrementer;
+import org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -12,7 +18,7 @@ import java.util.Date;
 public class Note {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank(message = "Заголовок не может быть пустым")
@@ -30,6 +36,13 @@ public class Note {
     private Date createDate;
 
     private Date modifyDate;
+
+    /**
+     * Нужно вручную создать триггеры before update/insert для инкремента
+     */
+    @Column(insertable = false, updatable = false)
+    @Generated(GenerationTime.ALWAYS)
+    private Long version;
 
     public Long getId() {
         return id;
@@ -85,5 +98,9 @@ public class Note {
 
     public void setModifyDate(Date modifyDate) {
         this.modifyDate = modifyDate;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 }

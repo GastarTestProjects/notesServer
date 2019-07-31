@@ -2,7 +2,7 @@ package ru.xe72.notes.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import ru.xe72.notes.db.NotesRepository;
@@ -28,6 +28,7 @@ public class MainController {
 
   @GetMapping("notes")
   public List<Note> getNotes(
+      @RequestParam(value = "version", required = false) Long version,
       @RequestParam(value = "filter", required = false) String filter,
       @RequestParam(value = "sortCol", required = false) String sortCol,
       @RequestParam(value = "sortAsc", required = false) Boolean sortAsc) {
@@ -37,10 +38,12 @@ public class MainController {
         Sort.by(
             Boolean.TRUE.equals(sortAsc) ? Sort.Direction.ASC : Sort.Direction.DESC,
             NU.nvlOrEmpty(sortCol, "createDate"));
-    if (StringUtils.isEmpty(filter)) {
+    if (version != null) {
+      result = notesRepository.findByVersionGreaterThan(version);
+    } else if (StringUtils.isEmpty(filter)) {
       result = notesRepository.findAll(sort);
     } else {
-      result = notesRepository.findAllByTitleIn(filter, sort);
+      result = notesRepository.findByTitleIn(filter, sort);
     }
     return result;
   }
@@ -52,7 +55,6 @@ public class MainController {
 
   @PostMapping("notes")
   public Long addNote(@RequestBody @Valid Note note) {
-
     return notesRepository.save(prepareNoteForSave(note)).getId();
   }
 
@@ -91,6 +93,7 @@ public class MainController {
           .forEach(newTags::add);
       note.setTags(newTags);
     }
+
     return note;
   }
 
@@ -110,6 +113,7 @@ public class MainController {
     return tagsRepository.save(tag);
   }
 
+  @Transactional
   @DeleteMapping("notes")
   public void deleteNotes(@RequestBody List<Long> ids) {
     notesRepository.deleteByIdIn(ids);

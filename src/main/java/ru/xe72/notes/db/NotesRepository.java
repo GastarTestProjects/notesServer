@@ -11,7 +11,9 @@ import java.util.List;
 public interface NotesRepository extends CrudRepository<Note, Long> {
     List<Note> findAll(Sort sort);
 
-    List<Note> findAllByTitleIn(String title, Sort sort);
+    List<Note> findByTitleIn(String title, Sort sort);
+
+    List<Note> findByVersionGreaterThan(Long version);
 
     void deleteByIdIn(List<Long> ids);
 }
