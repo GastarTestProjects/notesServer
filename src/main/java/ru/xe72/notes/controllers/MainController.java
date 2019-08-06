@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import ru.xe72.notes.db.NotesRepository;
+import ru.xe72.notes.db.NotesSearch;
 import ru.xe72.notes.db.TagsRepository;
 import ru.xe72.notes.entity.Note;
 import ru.xe72.notes.entity.Tag;
@@ -20,11 +21,14 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @RestController
+@RequestMapping("api")
 public class MainController {
 
   @Autowired NotesRepository notesRepository;
 
   @Autowired TagsRepository tagsRepository;
+
+  @Autowired NotesSearch notesSearchRepository;
 
   @GetMapping("notes")
   public List<Note> getNotes(
@@ -43,7 +47,8 @@ public class MainController {
     } else if (StringUtils.isEmpty(filter)) {
       result = notesRepository.findAll(sort);
     } else {
-      result = notesRepository.findByTitleIn(filter, sort);
+//   /   result = notesRepository.findByTitleContainingIgnoreCase(filter, sort);
+      result = notesSearchRepository.searchNotes(filter);
     }
     return result;
   }
@@ -108,10 +113,10 @@ public class MainController {
     return tagsRepository.findById(name.toLowerCase());
   }
 
-  @PostMapping("tags")
-  public Tag addTag(@RequestBody Tag tag) {
-    return tagsRepository.save(tag);
-  }
+//  @PostMapping("tags")
+//  public Tag addTag(@RequestBody Tag tag) {
+//    return tagsRepository.save(tag);
+//  }
 
   @Transactional
   @DeleteMapping("notes")

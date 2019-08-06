@@ -1,5 +1,8 @@
 package ru.xe72.notes.entity;
 
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
+
 import javax.persistence.*;
 
 @Entity
@@ -7,6 +10,7 @@ import javax.persistence.*;
 //        ,indexes = @Index(columnList = "name", unique = true)
 //        ,uniqueConstraints = @UniqueConstraint(columnNames = {"name"}) // Наверно не нужен, раз в индексе указано
 )
+@Indexed
 public class Tag {
 
 //    @Id
@@ -14,6 +18,7 @@ public class Tag {
 //    private Long id;
 
     @Id
+    @Field(name = "nameSearch")
     private String name;
 
     public Tag() {

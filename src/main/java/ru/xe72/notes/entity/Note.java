@@ -1,8 +1,14 @@
 package ru.xe72.notes.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.apache.lucene.analysis.ru.RussianAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.GenerationTime;
+import org.hibernate.search.annotations.Analyzer;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.IndexedEmbedded;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
 import org.springframework.jdbc.support.incrementer.H2SequenceMaxValueIncrementer;
@@ -15,18 +21,23 @@ import java.util.Date;
 
 @Entity
 @Table(name = "notes")
+@Indexed
+//@Analyzer(impl = RussianAnalyzer.class)
 public class Note {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Field
     @NotBlank(message = "Заголовок не может быть пустым")
     private String title;
 
+    @Field
     @NotBlank(message = "Текст заметки не может быть пустым")
     private String text;
 
+    @IndexedEmbedded
     @ManyToMany(fetch = FetchType.EAGER)
     private Collection<Tag> tags;
 
