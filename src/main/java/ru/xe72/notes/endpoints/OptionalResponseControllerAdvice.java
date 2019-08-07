@@ -1,9 +1,8 @@
-package ru.xe72.notes.controllers;
+package ru.xe72.notes.endpoints;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -25,4 +24,10 @@ public class OptionalResponseControllerAdvice implements ResponseBodyAdvice {
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
         return ((Optional<?>)body).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
+
+////    @ExceptionHandler(NoHandlerFoundException.class)
+//    @ResponseStatus(HttpStatus.NOT_FOUND)
+//    public String renderDefaultPage() {
+//        return "index.html";
+//    }
 }

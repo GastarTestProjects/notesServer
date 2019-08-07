@@ -2,9 +2,10 @@ package ru.xe72.notes.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import ru.xe72.notes.db.NotesRepository;
 import ru.xe72.notes.db.NotesSearch;
 import ru.xe72.notes.db.TagsRepository;
@@ -20,8 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@RestController
-@RequestMapping("api")
+@Component
 public class MainController {
 
   @Autowired NotesRepository notesRepository;
@@ -30,12 +30,7 @@ public class MainController {
 
   @Autowired NotesSearch notesSearchRepository;
 
-  @GetMapping("notes")
-  public List<Note> getNotes(
-      @RequestParam(value = "version", required = false) Long version,
-      @RequestParam(value = "filter", required = false) String filter,
-      @RequestParam(value = "sortCol", required = false) String sortCol,
-      @RequestParam(value = "sortAsc", required = false) Boolean sortAsc) {
+  public List<Note> getNotes(Long version, String filter, String sortCol, Boolean sortAsc) {
     List<Note> result;
 
     Sort sort =
@@ -47,23 +42,20 @@ public class MainController {
     } else if (StringUtils.isEmpty(filter)) {
       result = notesRepository.findAll(sort);
     } else {
-//   /   result = notesRepository.findByTitleContainingIgnoreCase(filter, sort);
+      //   /   result = notesRepository.findByTitleContainingIgnoreCase(filter, sort);
       result = notesSearchRepository.searchNotes(filter);
     }
     return result;
   }
 
-  @GetMapping("notes/{id}")
   public Optional<Note> getNote(@PathVariable("id") Long id) {
     return notesRepository.findById(id);
   }
 
-  @PostMapping("notes")
   public Long addNote(@RequestBody @Valid Note note) {
     return notesRepository.save(prepareNoteForSave(note)).getId();
   }
 
-  @PostMapping("notesBatch")
   public Iterable<Long> addNotes(@RequestBody @Valid List<Note> notes) {
     return StreamSupport.stream(
             notesRepository
@@ -102,24 +94,10 @@ public class MainController {
     return note;
   }
 
-  @GetMapping("tags")
   public List<Tag> getTags() {
-    //        return Arrays.asList(new Tag("tag1"), new Tag("tag2"));
     return tagsRepository.findAll(Sort.by(Sort.Order.asc("name")));
   }
 
-  @GetMapping("tags/{name}")
-  public Optional<Tag> getTag(@PathVariable("name") String name) {
-    return tagsRepository.findById(name.toLowerCase());
-  }
-
-//  @PostMapping("tags")
-//  public Tag addTag(@RequestBody Tag tag) {
-//    return tagsRepository.save(tag);
-//  }
-
-  @Transactional
-  @DeleteMapping("notes")
   public void deleteNotes(@RequestBody List<Long> ids) {
     notesRepository.deleteByIdIn(ids);
   }
